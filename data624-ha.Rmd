@@ -1,0 +1,273 @@
+---
+title: "Data 624 - HA Assignments"
+author: "Group 1"
+date: "`r Sys.Date()`"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(tidy = TRUE)
+knitr::opts_chunk$set(warning = FALSE)
+
+libs <- c("tidyverse", "knitr", "kableExtra", "fpp2", "glue")
+
+loadPkg <- function(x) {
+  if(!require(x, character.only = T)) install.packages(x, dependencies = T)
+  require(x, character.only = T)
+}
+
+lapply(libs, loadPkg)
+```
+
+## HW1
+
+### 2.3
+![](./week1/2.3.png)
+
+
+#### a
+![](./week1/2.3a.png)
+
+```{r}
+retailData <-  readxl::read_excel('./week1/retail.xlsx', skip=1)
+```
+
+
+
+#### b
+![](./week1/2.3b.png)
+
+```{r}
+myts <- ts(retailData[, "A3349338X"],
+           frequency = 12,
+           start=c(1982,4))
+```
+
+
+
+#### c
+![](./week1/2.3c.png)
+
+```{r}
+autoplot(myts[, "A3349338X"]) +
+  ggtitle("Time Series Plot A3349338X") +
+  xlab("Year") +
+  ylab("Value")
+```
+
+From the time series plot, we able to deduce:
+* Trend: there is a clear upward trend over the duration of the time series
+
+```{r}
+ggseasonplot(myts, year.labels = T) +
+  ggtitle("Seasonal plot: A3349338X")
+
+ggsubseriesplot(myts) +
+  ggtitle("Seasonal subseries pllot: A3349338X")
+```
+
+From the seasonal plot,  we are able to deduce:
+* Seasonality: there is some clear seasonality that exists among different month, however it is not without minor variation/deviation between the years
+* December shows a clear uptick while February shows a clear downtick
+
+```{r}
+ggAcf(myts)
+```
+
+From the Acf plot, we are able to confirm:
+* Trend: the autocorrelations are slowly decreasing as the lags are increasing
+
+Conclusion:
+* Trend exists in this time series and is slowly going upwrd
+* Seasonality appears to exist however there are years that defy seasonality patterns
+* There does not appear to be any cyclic behavior
+
+### 2.7
+![](./week1/2.7.png)
+
+```{r}
+arrivals <- data("arrivals")
+```
+
+```{r}
+autoplot(arrivals) +
+  ggtitle("Arrivals Time Series") +
+  facet_wrap(~series)
+```
+
+Observations:
+* Japan seems to experience a an upward trend, reach an apex, and then experience a downward trend
+* NZ, UK, and US all experience upward trends in arrivals albeit to different degrees
+* UK appears to have the greatest variance in their arrival figures
+* US has very little deviation in their arrival trend
+* NZ has more fluctuation than US, but less than UK in their arrivals
+* US on average has the lowest amount of arrivals
+
+```{r}
+genSeasonPlot <- function(country) {
+  ggseasonplot(arrivals[, country]) +
+    ggtitle(glue("Season Plot: {country}"))
+}
+
+countries <- c("Japan", "NZ", "US", "UK")
+countries %>%
+  map(~ genSeasonPlot(.x))
+```
+
+Observations from Seasonal Plots:
+* Typically the countries will see their highest arrivals in Q3, however the UK appears to go against this seasonal pattern
+* Q2 appears to be a down quarter for all countries except NZ
+* Q1 is a low point for NZ, and generally a high point for the other countries
+
+```{r}
+genSubSeasonPlot <- function(country) {
+  ggsubseriesplot(arrivals[, country]) +
+    ggtitle(glue("Subseries Plot: {country}"))
+}
+
+countries %>%
+  map(~ genSubSeasonPlot(.x))
+```
+
+Observations:
+* Japan's mean stays relatively flat across the quarters outside of Q2
+* US also remains relatively consistent and further backs up the lack of deviation point made earlier
+* UK experiences the most arrivals in Q1 and A4
+
+
+
+### 2.10
+![](./week1/2.10.png)
+
+```{r}
+data("dj")
+ddj <- diff(dj)
+```
+
+```{r}
+autoplot(ddj)
+```
+
+The autoplot appears to show random variation with peaks and valleys 
+
+
+```{r}
+ggAcf(ddj)
+```
+
+The changes in the Dow Jones Index do appear to be white noise as the the autocorrelations are very close to zero
+
+### 3.1
+![](./week1/3.1.png)
+
+#### usnetelec
+```{r}
+data("usnetelec")
+lambda <- BoxCox.lambda(usnetelec) %>%
+  print()
+
+autoplot(BoxCox(usnetelec, lambda))
+```
+
+
+#### usgdp
+```{r}
+data("usgdp")
+
+lambda <- BoxCox.lambda(usgdp) %>%
+  print()
+
+autoplot(BoxCox(usgdp, lambda))
+```
+
+
+#### mcopper
+```{r}
+data("mcopper")
+
+lambda <- BoxCox.lambda(mcopper) %>%
+  print()
+
+autoplot(BoxCox(mcopper, lambda))
+```
+
+
+#### enplanements
+```{r}
+data("enplanements")
+
+lambda <- BoxCox.lambda(enplanements) %>%
+  print()
+
+autoplot(BoxCox(enplanements, lambda))
+```
+
+
+### 3.8
+![](./week1/3.8.png)
+
+#### a
+![](./week1/3.8a.png)
+
+```{r}
+myts.train <- window(myts, end=c(2010,12))
+myts.test <- window(myts, start=2011)
+```
+
+#### b
+![](./week1/3.8b.png)
+
+```{r}
+autoplot(myts) +
+  autolayer(myts.train, series="Training") +
+  autolayer(myts.test, series="Test")
+```
+
+The autoplot shows that the data has been correctly split with the latter part of the data reservered for testing
+
+#### c
+![](./week1/3.8c.png)
+
+```{r}
+fc <- snaive(myts.train)
+
+print(fc)
+```
+
+#### d
+![](./week1/3.8d.png)
+
+```{r}
+accuracy(fc, myts.test)
+```
+
+Conclusions:
+* The MASE shows that the seasonal naive method does produce a better forecast than the average naive forecast although very slightly. The MASE is only .95
+* The MAPE shows that there is about a 9% error in the forecast on average which is not bad, but does show tht it could be improved
+* The RMSE and MAE both show that it is possible to improve the forecast but the seasonal naive forecast does do a decent job
+
+#### e
+![](./week1/3.8e.png)
+
+```{r}
+checkresiduals(fc)
+```
+
+The residual diagnostics show:
+* An approximately normal distribution
+* The mean of the residuals is close to 0
+* The residual variance appears to be contant
+* The residuals appear uncorrelated
+* Although the residuals pass the diagnostic tests, it does still show that the prediction intervals may be inaccurate
+* The Box-Ljung test does show a very small p-value which means the residuals are distinguishable from a white noise series. The Q* value is also very large
+
+#### f
+![](./week1/3.8f.png)
+
+
+Accuracy measures are very sensitive to the training/test split. Forecasts by definition need historical data. The more information present to forecast on, the better the forecast
