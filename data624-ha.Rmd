@@ -262,7 +262,7 @@ The residual diagnostics show:
 * An approximately normal distribution
 * The mean of the residuals is close to 0
 * The residual variance appears to be contant
-* The residuals appear uncorrelated
+* The residuals appear to be correlated as the lags near to each other are similar in direction and size
 * Although the residuals pass the diagnostic tests, it does still show that the prediction intervals may be inaccurate
 * The Box-Ljung test does show a very small p-value which means the residuals are distinguishable from a white noise series. The Q* value is also very large
 
@@ -271,3 +271,39 @@ The residual diagnostics show:
 
 
 Accuracy measures are very sensitive to the training/test split. Forecasts by definition need historical data. The more information present to forecast on, the better the forecast
+
+
+## HW2
+
+### 6.2
+![](./week2/6.2.png)
+
+
+
+#### a
+![](./week2/6.2a.png)
+
+
+
+#### b
+![](./week2/6.2b.png)
+
+
+#### c
+![](./week2/6.2c.png)
+
+
+#### d
+![](./week2/6.2d.png)
+
+
+#### e
+![](./week2/6.2e.png)
+
+
+#### f
+![](./week2/6.2f.png)
+
+
+
+### 6.6
