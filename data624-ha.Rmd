@@ -307,3 +307,53 @@ Accuracy measures are very sensitive to the training/test split. Forecasts by de
 
 
 ### 6.6
+![](./week2/6.6.png)
+
+
+#### a
+![](./week2/6.6a.png)
+
+
+
+#### b
+![](./week2/6.6b.png)
+
+
+
+
+
+#### c
+![](./week2/6.6c.png)
+
+
+
+
+
+#### d
+![](./week2/6.6d.png)
+
+
+
+
+
+#### e
+![](./week2/6.6f.png)
+
+
+
+
+
+#### f
+![](./week2/6.6f.png)
+
+
+
+
+
+#### g
+![](./week2/6.6g.png)
+
+
+
+
+
