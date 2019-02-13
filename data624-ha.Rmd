@@ -1,6 +1,6 @@
 ---
 title: "Data 624 - HA Assignments"
-author: "Group 1"
+author: "Group 1: Andrew Carson, Nathan Cooper, Baron Curtin, Heather Geiger, Alejandro Osborne"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
