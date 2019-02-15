@@ -1,6 +1,6 @@
 ---
 title: "Data 624 - HA Assignments"
-author: "Group 1"
+author: "Group 1: Andrew Carson, Nathan Cooper, Baron Curtin, Heather Geiger, Alejandro Osborne"
 date: "`r Sys.Date()`"
 output:
   prettydoc::html_pretty:
@@ -287,29 +287,105 @@ Accuracy measures are very sensitive to the training/test split. Forecasts by de
 
 
 
+```{r, include=TRUE}
+autoplot(plastics) + xlab("Month") + ylab("1000 $") +
+  ggtitle("Monthly Plastic Sales")
+```
+
+The data has approximately 1 month (peak to peak) seasonality and an apprearent upward trend, that may be cyclic behavior since this only covers 6 months of data.
+
+
 #### b
 ![](./week2/6.2b.png)
 
+```{r}
+plastics
+autoplot(plastics)
+plas_trend <- ma(plastics, order = 12, centre = TRUE)
+plas_trend
+autoplot(plas_trend)
+plas_detrend <- plastics/plas_trend
+plas_detrend
+plas_seas <- colMeans(t(matrix(plas_detrend,nrow = 12)), na.rm = TRUE)
+plas_seas
+autoplot(as.ts(plas_seas))
+random_plas = plastics/ (plas_trend* plas_seas)
+(random_plas)
+random_plas
+```
+
+```{r}
+plastics %>% decompose(type="multiplicative") %>%
+  autoplot() + xlab("Month") +
+  ggtitle("Classical multiplicative decomposition
+    of Plastic Sales")
+```
+
+```{r}
+plastics %>% decompose(type="multiplicative")
+```
 
 
 #### c
 ![](./week2/6.2c.png)
 
+Yes the trend is sloped upward and the seasonal trend reaches maximum once a month.
 
 
 #### d
 ![](./week2/6.2d.png)
 
+```{r}
+plas_seas <- decompose(plastics, type = 'multiplicative')$seasonal
+plas_seas
+plas_seas_adj = plastics/plas_seas
+autoplot(plas_seas_adj)
+```
 
 
 #### e
 ![](./week2/6.2e.png)
 
+```{r}
+plastics[30]
+new_val <- plastics[30]+500
+plas_outlier <- replace(plastics,30, new_val)
+plas_outlier[30]
+plas_seas_outlier <- decompose(plas_outlier, type = 'multiplicative')$seasonal
+plas_seas_outlier
+plas_seas_adj_outlier = plas_outlier/plas_seas_outlier
+autoplot(plas_seas_adj_outlier)
+```
+
+It adds a spike to the seasonally adjusted data where the outlier is.
 
 
 #### f
 ![](./week2/6.2f.png)
 
+```{r}
+plastics[5]
+new_val <- plastics[5]+500
+plas_outlier <- replace(plastics,5, new_val)
+plas_outlier[5]
+plas_seas_outlier <- decompose(plas_outlier, type = 'multiplicative')$seasonal
+plas_seas_outlier
+plas_seas_adj_outlier = plas_outlier/plas_seas_outlier
+autoplot(plas_seas_adj_outlier)
+```
+
+```{r}
+plastics[55]
+new_val <- plastics[55]+500
+plas_outlier <- replace(plastics,55, new_val)
+plas_outlier[55]
+plas_seas_outlier <- decompose(plas_outlier, type = 'multiplicative')$seasonal
+plas_seas_outlier
+plas_seas_adj_outlier = plas_outlier/plas_seas_outlier
+autoplot(plas_seas_adj_outlier)
+```
+
+Yes, the spike occurs where the outlier is.
 
 
 ### 6.6
@@ -319,45 +395,198 @@ Accuracy measures are very sensitive to the training/test split. Forecasts by de
 #### a
 ![](./week2/6.6a.png)
 
+```{r, include=TRUE}
+bricksq %>% autoplot()
+bricksq %>%
+  stl(t.window=13, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=13, s.window=7, robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=13, s.window=25, robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=13, s.window=81, robust=TRUE) %>%
+  autoplot()
+```
+
+We see that a high s.window yeilds the same as periodic.
+
+```{r, include=TRUE}
+bricksq %>% autoplot()
+bricksq %>%
+  stl(t.window=13, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=25, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=7, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+bricksq %>%
+  stl(t.window=3, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+```
+
+The t.window parameter adjusts the goodness of fit of the trend, low values tend to under fit the trend, and high values tend to over fit the trend.
 
 
 #### b
 ![](./week2/6.6b.png)
 
 
-
+```{r, include=TRUE}
+brick_seas <- decompose(bricksq, type = 'multiplicative')$seasonal
+brick_seas
+brick_seas_adj = bricksq/brick_seas
+autoplot(brick_seas_adj)
+```
 
 
 #### c
 ![](./week2/6.6c.png)
 
-
+```{r, include=TRUE}
+brick_naive <- naive(brick_seas_adj, h=12)
+brick_naive
+autoplot(brick_seas_adj) +
+  autolayer(brick_naive,
+    series="Naïve", PI=TRUE)
+```
 
 
 
 #### d
 ![](./week2/6.6d.png)
 
-
+```{r, include=TRUE}
+fcast <- stlf(brick_seas_adj, method='naive')
+autoplot(fcast)
+```
 
 
 
 #### e
 ![](./week2/6.6f.png)
 
+```{r, include=TRUE}
+res_brk <- residuals(brick_naive)
+autoplot(res_brk)
+gghistogram(res_brk) + ggtitle("Histogram of residuals")
+ggAcf(res_brk) + ggtitle("ACF of residuals")
+res_fcast <- residuals(fcast)
+autoplot(res_fcast)
+gghistogram(res_brk) + ggtitle("Histogram of residuals")
+```
 
+They seem to increse as time increases, so no they do not look uncorrelated. Also a couple of the lags show significance, that may or may not be by chance.
 
 
 
 #### f
 ![](./week2/6.6f.png)
 
+```{r, include=TRUE}
+brick_stl <- brick_seas_adj %>% stlf(t.window=7, s.window="periodic", method = 'naive', robust=TRUE) 
+brick_stl %>% autoplot()
+```
 
+In this instance, it the residuals appear to behave similarly to a STL decompostion that is not robust.
+
+```{r}
+res_brk2 <- brick_stl %>% residuals()
+res_brk2 %>% autoplot()
+gghistogram(res_brk2) + ggtitle("Histogram of residuals")
+ggAcf(res_brk2) + ggtitle("ACF of residuals")
+```
 
 
 
 #### g
 ![](./week2/6.6g.png)
+
+```{r}
+train <- bricksq %>% window(1956, c(1992, 3))
+test <- bricksq %>% window(c(1992, 4), c(1994, 4))
+train_stlf <- train %>% stlf(method='naive', h=8)
+train_snaiv <- train %>% snaive(h=8)
+autoplot(bricksq) +
+  autolayer(train_stlf, series="STL", PI=FALSE) +
+  autolayer(train_snaiv, series="Seasonal naïve", PI=FALSE) +
+  xlab("Quarter") + ylab("Bricks") +
+  ggtitle("Forecasts for quarterly brick production") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+
+From the graphs, it is hard to tell.
+
+```{r}
+accuracy(train_snaiv, test)
+accuracy(train_stlf, test)
+```
+
+From the accuracy fucnction, it appears that the STL decomposition performs better by yeilding less error in ME, RMSE, MAE, MPE, MAPE, and MASE.
+
+
+### 3.1
+![](./week3/3.1.png)
+
+![](./week3/3.1cont.png)
+
+
+#### 3.1a
+![](./week3/3.1a.png)
+
+
+
+
+
+#### 3.1b
+![](./week3/3.1b.png)
+
+
+
+
+
+
+#### 3.1c
+![](./week3/3.1c.png)
+
+
+
+
+
+
+### 3.2
+![](./week3/3.2.png)
+
+![](./week3/3.2cont.png)
+
+
+
+#### 3.2a
+![](./week3/3.2a.png)
+
+
+
+
+
+
+#### 3.2b
+![](./week3/3.2b.png)
+
+
+
+
+
+
+#### 3.2c
+![](./week3/3.2c.png)
+
+
+
+
 
 
 
