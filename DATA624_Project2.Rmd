@@ -1,0 +1,119 @@
+---
+title: "Project 2"
+author: "Andrew Carson"
+date: "May 3, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data
+```{r}
+#read data
+filepath <- "C:/Users/Andy/Desktop/Personal/Learning/CUNY/DATA624/Project2/"
+train <- read.csv(paste0(filepath,"StudentData.csv"),header=TRUE)
+test <- read.csv(paste0(filepath,"StudentEvaluation- TO PREDICT.csv"),header=TRUE)
+```
+
+
+## Libraries
+```{r}
+library(MASS)
+library(pls)
+library(elasticnet)
+library(nnet)
+library(rpart)
+library(randomForest)
+library(gbm)
+library(Cubist)
+library(rms)
+
+```
+
+## Quick Models
+
+```{r}
+# lm
+train_complete <- na.omit(train)
+model_lm <- lm(PH~., data=train_complete)
+summary(model_lm)
+#Residual standard error: 0.1282 on 2093 degrees of freedom
+#Multiple R-squared:  0.4488,	Adjusted R-squared:  0.4396 
+#F-statistic:  48.7 on 35 and 2093 DF,  p-value: < 2.2e-16
+
+
+model_lm <- stepAIC(model_lm, trace = 0)
+summary(model_lm)
+#Residual standard error: 0.128 on 2105 degrees of freedom
+#Multiple R-squared:  0.447,	Adjusted R-squared:  0.4409 
+#F-statistic: 73.97 on 23 and 2105 DF,  p-value: < 2.2e-16
+
+```
+
+```{r}
+#rlm
+model_rlm <- rlm(PH~., data=train_complete)
+summary(model_rlm)
+#Residual standard error: 0.1164 on 2093 degrees of freedom
+
+```
+
+```{r}
+#pls
+model_pls <- plsr(PH~., data=train_complete)
+summary(model_pls)
+
+
+```
+
+
+```{r}
+#ridge regression
+model_pls <- plsr(PH~., data=train_complete)
+summary(model_pls)
+
+
+```
+
+```{r}
+#nnet
+model_nnet <- nnet(PH~., data=train_complete, size = 2)
+summary(model_nnet)
+
+
+```
+
+```{r}
+#rpart
+model_rpart <- rpart(PH~., data=train, model = TRUE)
+model_rpart
+validate(model_rpart) #0.01457879 MSE
+
+```
+
+```{r}
+#randomforest
+model_RF <- randomForest(PH~., data=train_complete)
+model_RF
+#          Mean of squared residuals: 0.008467209
+#                    % Var explained: 71.11
+
+```
+
+```{r}
+#gbm
+model_gbm <- gbm(PH~., data=train_complete, distribution = "gaussian", n.trees = 1000)
+model_gbm$train.error[1000] #0.01116866 RMSE
+
+
+```
+
+```{r}
+#cubist
+model_cubist<- cubist(PH~., data=train_complete)
+model_cubist
+
+
+```
